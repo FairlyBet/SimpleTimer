@@ -138,6 +138,9 @@ namespace SimpleTimer
             _context.ControlButton.Enabled = true;
             _context.ControlButton.Text = "Continue";
             _context.Form.ShowFromTray();
+            _context.Form.BringToFront();
+            _context.Form.TopMost = true;
+            _context.Form.Focus();
             _player.PlayLooping();
         }
 
@@ -154,6 +157,7 @@ namespace SimpleTimer
             {
                 _switchState(new WorkingIntervalElapsingState(_switchState, _context));
             }
+            _context.Form.HideInTray();
         }
     }
 }

@@ -41,8 +41,9 @@
             this.TimeLabel.Font = new System.Drawing.Font("Segoe UI", 48F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.TimeLabel.Location = new System.Drawing.Point(0, 0);
             this.TimeLabel.Name = "TimeLabel";
-            this.TimeLabel.Size = new System.Drawing.Size(262, 120);
+            this.TimeLabel.Size = new System.Drawing.Size(204, 90);
             this.TimeLabel.TabIndex = 0;
+            this.TimeLabel.Text = "00:00";
             this.TimeLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // ControlButton
@@ -52,10 +53,9 @@
             this.ControlButton.FlatAppearance.BorderSize = 4;
             this.ControlButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.ControlButton.Font = new System.Drawing.Font("Segoe UI", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.ControlButton.Location = new System.Drawing.Point(0, 124);
-            this.ControlButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.ControlButton.Location = new System.Drawing.Point(0, 93);
             this.ControlButton.Name = "ControlButton";
-            this.ControlButton.Size = new System.Drawing.Size(262, 77);
+            this.ControlButton.Size = new System.Drawing.Size(204, 58);
             this.ControlButton.TabIndex = 1;
             this.ControlButton.UseVisualStyleBackColor = false;
             // 
@@ -67,14 +67,13 @@
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(262, 201);
+            this.ClientSize = new System.Drawing.Size(210, 151);
             this.Controls.Add(this.ControlButton);
             this.Controls.Add(this.TimeLabel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.ShowIcon = false;

@@ -16,8 +16,7 @@ namespace SimpleTimer
         {
             if (WindowState == FormWindowState.Minimized)
             {
-                Hide();
-                NotifyIcon.Visible = true;
+                HideInTray();
             }
         }
 
@@ -36,6 +35,12 @@ namespace SimpleTimer
             Show();
             WindowState = FormWindowState.Normal;
             NotifyIcon.Visible = false;
+        }
+
+        public void HideInTray()
+        {
+            Hide();
+            NotifyIcon.Visible = true;
         }
     }
 }
