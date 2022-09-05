@@ -20,7 +20,7 @@ namespace SimpleTimer
             }
         }
 
-        private void NotifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void NotifyIcon_Click(object sender, EventArgs e)
         {
             ShowFromTray();
         }
@@ -34,13 +34,15 @@ namespace SimpleTimer
         {
             Show();
             WindowState = FormWindowState.Normal;
-            NotifyIcon.Visible = false;
+            BringToFront();
+            TopMost = true;
+            Focus();
         }
 
         public void HideInTray()
         {
+            WindowState = FormWindowState.Minimized;
             Hide();
-            NotifyIcon.Visible = true;
         }
     }
 }

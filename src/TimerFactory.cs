@@ -14,12 +14,12 @@
             ConfigureFromFile();
         }
 
-        public static AsyncSecondBasedTimer TimerForWork()
+        public static AsyncSecondDrivenTimer CreateTimerForWork()
         {
             return new(60 * _minutesForWork);
         }
 
-        public static AsyncSecondBasedTimer TimerForRest()
+        public static AsyncSecondDrivenTimer CreateTimerForRest()
         {
             return new(60 * _minutesForRest);
         }
@@ -38,7 +38,9 @@
                 EnsureFileExistance();
                 _minutesForWork = DefaultWorkMinutes;
                 _minutesForRest = DefaultRestMinutes;
+                return;
             }
+            streamReader.Close();
         }
 
         private static void EnsureFileExistance()

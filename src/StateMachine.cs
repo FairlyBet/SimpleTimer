@@ -3,7 +3,7 @@
 
 namespace SimpleTimer
 {
-    internal sealed class StateMachine
+    internal class StateMachine
     {
         private State _currentState;
 
@@ -15,13 +15,13 @@ namespace SimpleTimer
 
         public void Start()
         {
-            _currentState.Activate();
+            _currentState.Set();
         }
 
         private void SwitchState(State nextState)
         {
             _currentState = nextState;
-            _currentState.Activate();
+            _currentState.Set();
         }
     }
 
@@ -38,7 +38,7 @@ namespace SimpleTimer
             _context = context;
         }
 
-        public abstract void Activate();
+        public abstract void Set();
     }
 
 
@@ -46,9 +46,9 @@ namespace SimpleTimer
     {
         public InitialState(Action<State> switchState, StateMachineContext context) : base(switchState, context) { }
 
-        public override void Activate()
+        public override void Set()
         {
-            _context.TimeLabel.Text = TimeSpan.FromSeconds(TimerFactory.TimerForWork().IntervalSeconds).ToString("mm\\:ss");
+            _context.TimeLabel.Text = TimeSpan.FromSeconds(TimerFactory.CreateTimerForWork().IntervalSeconds).ToString("mm\\:ss");
             _context.ControlButton.Text = "Start";
             _context.ControlButton.Click += SwitchState;
         }
@@ -56,92 +56,65 @@ namespace SimpleTimer
         private void SwitchState(object sender, EventArgs e)
         {
             _context.ControlButton.Click -= SwitchState;
-            _switchState(new WorkingIntervalElapsingState(_switchState, _context));
+            _switchState(new IntervalElapsingState(_switchState, _context, new TimerSwitch()));
         }
     }
 
 
-    internal class WorkingIntervalElapsingState : State
+    internal class IntervalElapsingState : State
     {
-        public WorkingIntervalElapsingState(Action<State> switchState, StateMachineContext context) : base(switchState, context) { }
+        private readonly AsyncSecondDrivenTimer _timer;
+        private readonly TimerSwitch _switch;
 
-        public override void Activate()
+
+        public IntervalElapsingState(Action<State> switchState, StateMachineContext context, TimerSwitch @switch) : base(switchState, context)
         {
-            var timer = TimerFactory.TimerForWork();
-            timer.OnSecondElapsed += UpdateLayout;
-            timer.OnIntervalElapsed += SwitchState;
-            _context.TimeLabel.Text = TimeSpan.FromSeconds(timer.IntervalSeconds).ToString("mm\\:ss");
-            _context.ControlButton.Enabled = false;
-            timer.Start();
+            _switch = @switch;
+            _timer = _switch.AnotherTimer;
         }
 
-        private void UpdateLayout(AsyncSecondBasedTimer timer)
+        public override void Set()
+        {
+            _timer.OnSecondElapsed += UpdateContext;
+            _timer.OnIntervalElapsed += SwitchState;
+            _context.Form.HideInTray();
+            _context.TimeLabel.Text = TimeSpan.FromSeconds(_timer.IntervalSeconds).ToString("mm\\:ss");
+            _context.ControlButton.Enabled = false;
+
+            _timer.Start();
+        }
+
+        private void UpdateContext(AsyncSecondDrivenTimer timer)
         {
             _context.TimeLabel.Text = TimeSpan.FromSeconds(timer.IntervalSeconds - timer.Elapsed).ToString("mm\\:ss");
         }
 
         private void SwitchState()
         {
-            _switchState(new IntervalElapsedState(_switchState, _context, IntervalElapsedState.CreatedFrom.WorkingState));
-        }
-    }
-
-
-    internal class RestingIntervalElapsingState : State
-    {
-        public RestingIntervalElapsingState(Action<State> switchState, StateMachineContext context) : base(switchState, context) { }
-
-        public override void Activate()
-        {
-            var timer = TimerFactory.TimerForRest();
-            timer.OnSecondElapsed += UpdateLayout;
-            timer.OnIntervalElapsed += SwitchState;
-            _context.TimeLabel.Text = TimeSpan.FromSeconds(timer.IntervalSeconds).ToString("mm\\:ss");
-            _context.ControlButton.Enabled = false;
-            timer.Start();
-        }
-
-        private void UpdateLayout(AsyncSecondBasedTimer timer)
-        {
-            _context.TimeLabel.Text = TimeSpan.FromSeconds(timer.IntervalSeconds - timer.Elapsed).ToString("mm\\:ss");
-        }
-
-        private void SwitchState()
-        {
-            _switchState(new IntervalElapsedState(_switchState, _context, IntervalElapsedState.CreatedFrom.RestingState));
+            _switchState(new IntervalElapsedState(_switchState, _context, _switch));
         }
     }
 
 
     internal class IntervalElapsedState : State
     {
-        public enum CreatedFrom
-        {
-            WorkingState,
-            RestingState
-        }
-
-
-        private readonly CreatedFrom _from;
         private readonly SoundPlayer _player;
+        private readonly TimerSwitch _switch;
 
 
-        public IntervalElapsedState(Action<State> switchState, StateMachineContext context, CreatedFrom from) : base(switchState, context)
+        public IntervalElapsedState(Action<State> switchState, StateMachineContext context, TimerSwitch @switch) : base(switchState, context)
         {
-            _from = from;
+            _switch = @switch;
             _player = new SoundPlayer(Audio.alarm);
         }
 
-        public override void Activate()
+        public override void Set()
         {
             _context.ControlButton.Click += SwitchState;
             _context.ControlButton.Enabled = true;
             _context.ControlButton.Text = "Continue";
             _context.Form.ShowFromTray();
-            _context.Form.BringToFront();
-            _context.Form.TopMost = true;
-            _context.Form.Focus();
-            _player.PlayLooping();
+            _player.Play();
         }
 
         private void SwitchState(object sender, EventArgs e)
@@ -149,15 +122,37 @@ namespace SimpleTimer
             _player.Stop();
             _player.Dispose();
             _context.ControlButton.Click -= SwitchState;
-            if (_from == CreatedFrom.WorkingState)
+            _switchState(new IntervalElapsingState(_switchState, _context, _switch));
+        }
+    }
+
+
+    internal struct TimerSwitch
+    {
+        private bool _switch;
+
+        public AsyncSecondDrivenTimer AnotherTimer
+        {
+            get
             {
-                _switchState(new RestingIntervalElapsingState(_switchState, _context));
+                AsyncSecondDrivenTimer result;
+                if (_switch)
+                {
+                    result = TimerFactory.CreateTimerForWork();
+                }
+                else
+                {
+                    result = TimerFactory.CreateTimerForRest();
+                }
+                _switch = !_switch;
+                return result;
             }
-            if (_from == CreatedFrom.RestingState)
-            {
-                _switchState(new WorkingIntervalElapsingState(_switchState, _context));
-            }
-            _context.Form.HideInTray();
+        }
+
+
+        public TimerSwitch()
+        {
+            _switch = true;
         }
     }
 }

@@ -1,18 +1,18 @@
 ﻿namespace SimpleTimer
 {
-    internal sealed class AsyncSecondBasedTimer
+    internal sealed class AsyncSecondDrivenTimer
     {
         private readonly int _intervalSeconds;
         private int _elapsed;
         private bool _stop;
-        public event Action<AsyncSecondBasedTimer> OnSecondElapsed;
+        public event Action<AsyncSecondDrivenTimer> OnSecondElapsed;
         public event Action OnIntervalElapsed;
 
         public int IntervalSeconds => _intervalSeconds;
         public int Elapsed => _elapsed;
 
 
-        public AsyncSecondBasedTimer(int intervalSeconds)
+        public AsyncSecondDrivenTimer(int intervalSeconds)
         {
             _intervalSeconds = intervalSeconds;
         }

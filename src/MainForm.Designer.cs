@@ -63,7 +63,8 @@
             // 
             this.NotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("NotifyIcon.Icon")));
             this.NotifyIcon.Text = "SimpleTimer";
-            this.NotifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.NotifyIcon_MouseDoubleClick);
+            this.NotifyIcon.Click += new System.EventHandler(this.NotifyIcon_Click);
+            this.NotifyIcon.Visible = true;
             // 
             // MainForm
             // 
