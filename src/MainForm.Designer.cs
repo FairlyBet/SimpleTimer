@@ -41,7 +41,7 @@
             this.TimeLabel.Font = new System.Drawing.Font("Segoe UI", 48F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.TimeLabel.Location = new System.Drawing.Point(0, 0);
             this.TimeLabel.Name = "TimeLabel";
-            this.TimeLabel.Size = new System.Drawing.Size(204, 90);
+            this.TimeLabel.Size = new System.Drawing.Size(210, 90);
             this.TimeLabel.TabIndex = 0;
             this.TimeLabel.Text = "00:00";
             this.TimeLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -55,7 +55,7 @@
             this.ControlButton.Font = new System.Drawing.Font("Segoe UI", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.ControlButton.Location = new System.Drawing.Point(0, 93);
             this.ControlButton.Name = "ControlButton";
-            this.ControlButton.Size = new System.Drawing.Size(204, 58);
+            this.ControlButton.Size = new System.Drawing.Size(210, 58);
             this.ControlButton.TabIndex = 1;
             this.ControlButton.UseVisualStyleBackColor = false;
             // 
@@ -63,8 +63,8 @@
             // 
             this.NotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("NotifyIcon.Icon")));
             this.NotifyIcon.Text = "SimpleTimer";
-            this.NotifyIcon.Click += new System.EventHandler(this.NotifyIcon_Click);
             this.NotifyIcon.Visible = true;
+            this.NotifyIcon.Click += new System.EventHandler(this.NotifyIcon_Click);
             // 
             // MainForm
             // 
@@ -79,6 +79,7 @@
             this.Name = "MainForm";
             this.ShowIcon = false;
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyUp);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.ResumeLayout(false);
 

@@ -6,16 +6,25 @@ namespace SimpleTimer
     internal class StateMachine
     {
         private State _currentState;
+        private StateMachineContext _context;
 
 
         public StateMachine(StateMachineContext context)
         {
             _currentState = new InitialState(SwitchState, context);
+            _context = context;
         }
 
         public void Start()
         {
             _currentState.Set();
+        }
+
+        public void Restart()
+        {
+            _currentState.Reset();
+            _currentState = new InitialState(SwitchState, _context);
+            Start();
         }
 
         private void SwitchState(State nextState)
@@ -39,6 +48,8 @@ namespace SimpleTimer
         }
 
         public abstract void Set();
+
+        public virtual void Reset() { }
     }
 
 
@@ -50,13 +61,19 @@ namespace SimpleTimer
         {
             _context.TimeLabel.Text = TimeSpan.FromSeconds(TimerFactory.CreateTimerForWork().IntervalSeconds).ToString("mm\\:ss");
             _context.ControlButton.Text = "Start";
+            _context.ControlButton.Enabled = true;
             _context.ControlButton.Click += SwitchState;
         }
 
         private void SwitchState(object sender, EventArgs e)
         {
-            _context.ControlButton.Click -= SwitchState;
+            Reset();
             _switchState(new IntervalElapsingState(_switchState, _context, new TimerSwitch()));
+        }
+
+        public override void Reset()
+        {
+            _context.ControlButton.Click -= SwitchState;
         }
     }
 
@@ -75,23 +92,19 @@ namespace SimpleTimer
 
         public override void Set()
         {
-            _timer.OnSecondElapsed += UpdateContext;
-            _timer.OnIntervalElapsed += SwitchState;
-            _context.Form.HideInTray();
+            _timer.OnSecondElapsed += timer => _context.TimeLabel.Text = TimeSpan.FromSeconds(timer.IntervalSeconds - timer.Elapsed).ToString("mm\\:ss");
+            _timer.OnIntervalElapsed += () => _switchState(new IntervalElapsedState(_switchState, _context, _switch));
             _context.TimeLabel.Text = TimeSpan.FromSeconds(_timer.IntervalSeconds).ToString("mm\\:ss");
             _context.ControlButton.Enabled = false;
+            _context.Form.HideInTray();
 
             _timer.Start();
         }
 
-        private void UpdateContext(AsyncSecondDrivenTimer timer)
+        public override void Reset()
         {
-            _context.TimeLabel.Text = TimeSpan.FromSeconds(timer.IntervalSeconds - timer.Elapsed).ToString("mm\\:ss");
-        }
-
-        private void SwitchState()
-        {
-            _switchState(new IntervalElapsedState(_switchState, _context, _switch));
+            base.Reset();
+            _timer.Stop();
         }
     }
 
@@ -111,18 +124,24 @@ namespace SimpleTimer
         public override void Set()
         {
             _context.ControlButton.Click += SwitchState;
-            _context.ControlButton.Enabled = true;
             _context.ControlButton.Text = "Continue";
+            _context.ControlButton.Enabled = true;
             _context.Form.ShowFromTray();
             _player.Play();
         }
 
         private void SwitchState(object sender, EventArgs e)
         {
+            Reset();
+            _switchState(new IntervalElapsingState(_switchState, _context, _switch));
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
             _player.Stop();
             _player.Dispose();
             _context.ControlButton.Click -= SwitchState;
-            _switchState(new IntervalElapsingState(_switchState, _context, _switch));
         }
     }
 
